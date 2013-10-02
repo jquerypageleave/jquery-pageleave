@@ -1,4 +1,4 @@
-jQuery Pageleave
+jQuery pageleave
 ================
 
-This is the first commit to github.
+A small plugin for users leaving your page (based on jQuery).
