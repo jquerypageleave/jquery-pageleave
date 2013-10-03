@@ -26,14 +26,20 @@ Installation
 ------------
 1. Download it.
 2. Load it in your js file
-	<script type="text/javascript" src="js/jquery.pageleave.min.js"></script>
+
+```js
+<script type="text/javascript" src="js/jquery.pageleave.min.js"></script>
+```
 3. Bind it to an appropriate container:
-	<script type="text/javascript">
-		$(document).on('pageleave', function() {
-      		alert("Oh no! Please don't leave me!");
-    	});
-    	$(document).pageleave();
-  </script>
+
+```js
+<script type="text/javascript">
+	$(document).on('pageleave', function() {
+      	alert("Oh no! Please don't leave me!");
+    });
+    $(document).pageleave();
+</script>
+```
 4. If you encounter any errors or want to add functionality, open a [Pull Request][1]
 
 [1]: http://github.com/github/markup/pulls
