@@ -28,7 +28,7 @@ Installation
 2. Load it in your js file
 
 ```js
-<script type="text/javascript" src="js/jquery.pageleave.min.js"></script>
+<script type="text/javascript" src="js/jquery.pageleave.min.js"><\/script>
 ```
 3. Bind it to an appropriate container:
 
@@ -38,7 +38,7 @@ Installation
       	alert("Oh no! Please don't leave me!");
     });
     $(document).pageleave();
-</script>
+<\/script>
 ```
 4. If you encounter any errors or want to add functionality, open a [Pull Request][1]
 
