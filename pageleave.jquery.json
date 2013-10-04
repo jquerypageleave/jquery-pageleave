@@ -1,0 +1,27 @@
+{
+   "name":"pageleave",
+   "title":"jQuery Pageleave",
+   "description":"A small plugin for users wanting to leave your page (based on jQuery).",
+   "keywords":[
+      "pageleave",
+      "unload"
+   ],
+   "version":"1.0",
+   "author":{
+      "name":"Dr. J. Moehrke",
+      "url":"http://www.rexmedicus.com/jquerypageleave"
+   },
+   "licenses":[
+      {
+         "type":"MIT",
+         "url":"http://opensource.org/licenses/MIT"
+      }
+   ],
+   "bugs":"https://github.com/jquerypageleave/jquerypageleave/issues",
+   "homepage":"http://www.rexmedicus.com/jquerypageleave",
+   "docs":"http://www.rexmedicus.com/jquerypageleave",
+   "download":"https://github.com/jquerypageleave/jquery-pageleave/archive/master.zip",
+   "dependencies":{
+      "jquery":">=1.5"
+   }
+}
