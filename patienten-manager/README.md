@@ -17,7 +17,26 @@ und Anbindung an den Google Kalender.
 Technik: Node.js ≥ 22.13 (eingebautes SQLite), Express, Google Calendar REST API v3.
 Außer Express werden keine weiteren Pakete benötigt.
 
-## Schnellstart
+## Schnellstart ohne Kommandozeile (Doppelklick)
+
+1. Einmalig [Node.js](https://nodejs.org) (LTS-Version, mindestens 22.13) installieren.
+2. Den Ordner `patienten-manager` auf den Rechner kopieren (oder das ZIP entpacken).
+3. Starten:
+   - **Windows:** Doppelklick auf `start.bat`
+   - **macOS:** Doppelklick auf `start.command` (beim ersten Mal ggf. Rechtsklick → „Öffnen“)
+   - **Linux:** `./start.sh`
+
+Das Skript installiert bei Bedarf die Abhängigkeiten, legt die `.env` an und öffnet
+den Browser unter <http://localhost:3000>. Das Fenster muss geöffnet bleiben, solange
+die App läuft.
+
+Die App funktioniert vollständig offline: Daten liegen in `data/patienten.sqlite` auf
+dem eigenen Rechner, es werden keine externen Skripte oder Dienste geladen. Nur die
+Google-Kalender-Synchronisation benötigt eine Internetverbindung; ohne Verbindung
+werden Termine lokal gespeichert und lassen sich später mit **Alle Termine
+synchronisieren** nachträglich übertragen.
+
+## Schnellstart mit Kommandozeile
 
 ```bash
 cd patienten-manager
