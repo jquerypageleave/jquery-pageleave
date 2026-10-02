@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patienten-Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Patienten-Manager</h1>
+    <div id="google-status" class="google-status">
+      <span class="dot" id="google-dot"></span>
+      <span id="google-text">Google Kalender: wird geprüft …</span>
+      <a id="google-connect" class="btn btn-small" href="/auth/google" hidden>Mit Google Kalender verbinden</a>
+      <button id="google-sync" class="btn btn-small" hidden>Alle Termine synchronisieren</button>
+      <button id="google-disconnect" class="btn btn-small btn-ghost" hidden>Trennen</button>
+    </div>
+  </header>
+
+  <div id="meldung" class="meldung" hidden></div>
+
+  <main class="layout">
+    <!-- Linke Spalte: Patientenliste -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Patienten <span id="patienten-anzahl" class="badge">0</span></h2>
+        <button id="neu-patient" class="btn btn-primary">+ Neuer Patient</button>
+      </div>
+      <input id="suche" type="search" placeholder="Suchen: Name, E-Mail, Telefon, Versichertennummer …" autocomplete="off">
+      <ul id="patienten-liste" class="liste"></ul>
+      <p id="patienten-leer" class="leer" hidden>Noch keine Patienten erfasst.</p>
+    </section>
+
+    <!-- Rechte Spalte: Detail / Formular -->
+    <section class="panel" id="detail-panel">
+      <div id="detail-leer" class="leer">
+        <p>Wählen Sie links einen Patienten aus oder legen Sie einen neuen an.</p>
+      </div>
+
+      <form id="patient-form" class="form" hidden novalidate>
+        <div class="panel-head">
+          <h2 id="form-titel">Neuer Patient</h2>
+          <div class="actions">
+            <button type="button" id="form-abbrechen" class="btn btn-ghost">Abbrechen</button>
+            <button type="submit" class="btn btn-primary">Speichern</button>
+          </div>
+        </div>
+        <div class="grid">
+          <label>Anrede
+            <select name="anrede">
+              <option value="">–</option>
+              <option>Frau</option>
+              <option>Herr</option>
+              <option>Divers</option>
+            </select>
+          </label>
+          <label>Vorname *<input name="vorname" required></label>
+          <label>Nachname *<input name="nachname" required></label>
+          <label>Geburtsdatum<input name="geburtsdatum" type="date"></label>
+          <label>E-Mail<input name="email" type="email" placeholder="name@beispiel.de"></label>
+          <label>Telefon<input name="telefon" type="tel"></label>
+          <label class="span-2">Straße und Hausnummer<input name="strasse"></label>
+          <label>PLZ<input name="plz" inputmode="numeric"></label>
+          <label>Ort<input name="ort"></label>
+          <label>Krankenkasse<input name="krankenkasse"></label>
+          <label>Versichertennummer<input name="versichertennummer"></label>
+          <label class="span-2">Notizen<textarea name="notizen" rows="3"></textarea></label>
+        </div>
+        <p id="form-fehler" class="fehler" hidden></p>
+      </form>
+
+      <div id="patient-detail" hidden>
+        <div class="panel-head">
+          <h2 id="detail-name"></h2>
+          <div class="actions">
+            <button id="detail-bearbeiten" class="btn">Bearbeiten</button>
+            <button id="detail-loeschen" class="btn btn-danger">Löschen</button>
+          </div>
+        </div>
+        <dl id="detail-daten" class="daten"></dl>
+
+        <div class="panel-head termine-head">
+          <h3>Termine</h3>
+          <button id="neu-termin" class="btn btn-small btn-primary">+ Neuer Termin</button>
+        </div>
+
+        <form id="termin-form" class="form termin-form" hidden novalidate>
+          <input type="hidden" name="id">
+          <div class="grid">
+            <label class="span-2">Titel<input name="titel" placeholder="z. B. Kontrolluntersuchung"></label>
+            <label>Beginn *<input name="beginn" type="datetime-local" required step="300"></label>
+            <label>Dauer
+              <select name="dauer">
+                <option value="15">15 Minuten</option>
+                <option value="30" selected>30 Minuten</option>
+                <option value="45">45 Minuten</option>
+                <option value="60">60 Minuten</option>
+                <option value="90">90 Minuten</option>
+                <option value="120">2 Stunden</option>
+              </select>
+            </label>
+            <label class="span-2">Notizen<textarea name="notizen" rows="2"></textarea></label>
+            <label class="span-2 check"><input type="checkbox" name="patient_einladen"> Kalender-Einladung per E-Mail an den Patienten senden (nur mit Google-Verbindung und hinterlegter E-Mail)</label>
+          </div>
+          <p id="termin-fehler" class="fehler" hidden></p>
+          <div class="actions">
+            <button type="button" id="termin-abbrechen" class="btn btn-ghost">Abbrechen</button>
+            <button type="submit" class="btn btn-primary">Termin speichern</button>
+          </div>
+        </form>
+
+        <ul id="termine-liste" class="liste termine"></ul>
+        <p id="termine-leer" class="leer" hidden>Keine Termine vorhanden.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="tpl-patient">
+    <li class="eintrag" tabindex="0">
+      <div class="eintrag-name"></div>
+      <div class="eintrag-meta"></div>
+    </li>
+  </template>
+
+  <template id="tpl-termin">
+    <li class="termin">
+      <div class="termin-zeit"></div>
+      <div class="termin-body">
+        <div class="termin-titel"></div>
+        <div class="termin-notizen"></div>
+        <div class="termin-sync"></div>
+      </div>
+      <div class="termin-actions">
+        <button class="btn btn-small t-bearbeiten">Bearbeiten</button>
+        <button class="btn btn-small t-sync" hidden>In Kalender</button>
+        <button class="btn btn-small btn-danger t-loeschen">Löschen</button>
+      </div>
+    </li>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
