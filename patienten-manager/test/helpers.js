@@ -27,7 +27,10 @@ export function fakeGoogle() {
         if (body.code !== 'gutercode') return json(400, { error: 'invalid_grant', error_description: 'Code ungültig' });
         return json(200, { access_token: 'acc-1', refresh_token: 'ref-1', expires_in: 3600, scope: 's', token_type: 'Bearer' });
       }
-      if (body.grant_type === 'refresh_token') return json(200, { access_token: 'acc-2', expires_in: 3600, token_type: 'Bearer' });
+      if (body.grant_type === 'refresh_token') {
+        if (body.refresh_token === 'ref-abgelaufen') return json(400, { error: 'invalid_grant', error_description: 'Token has been expired or revoked.' });
+        return json(200, { access_token: 'acc-2', expires_in: 3600, token_type: 'Bearer' });
+      }
       return json(400, { error: 'unsupported' });
     }
     if (url.hostname === 'oauth2.googleapis.com' && url.pathname === '/revoke') return json(200, {});

@@ -129,3 +129,17 @@ test('Sync aller Termine und Token-Refresh', async (t) => {
   assert.equal(r.data.geloescht, true);
   assert.equal(s.fake.events.size, 0);
 });
+
+test('Abgelaufenes Refresh-Token setzt die Verbindung zurück', async (t) => {
+  const s = await startTestServer();
+  t.after(() => s.close());
+  await verbinden(s);
+  const tokens = s.repo.getJsonSetting('google_tokens');
+  s.repo.setJsonSetting('google_tokens', { ...tokens, refresh_token: 'ref-abgelaufen', expires_at: Date.now() - 1000 });
+
+  const r = await s.request('GET', '/api/google/events');
+  assert.equal(r.status, 409);
+  assert.match(r.data.fehler, /erneut/);
+  const status = await s.request('GET', '/api/google/status');
+  assert.equal(status.data.verbunden, false);
+});

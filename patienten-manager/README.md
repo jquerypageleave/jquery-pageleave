@@ -85,6 +85,33 @@ lokalen Datenbank gespeichert.
 6. In der Oberfläche oben auf **Mit Google Kalender verbinden** klicken und den Zugriff
    bestätigen.
 
+### Fehler „Access blocked: … has not completed the Google verification process“
+
+Diese Meldung erscheint beim Verbinden, wenn die OAuth-App bei Google im Status
+**Testen** steht und das verwendete Google-Konto nicht als **Testnutzer** eingetragen
+ist. Lösung:
+
+1. <https://console.cloud.google.com/> öffnen, oben das richtige Projekt wählen.
+2. Links **APIs und Dienste → OAuth-Zustimmungsbildschirm** (neuere Oberfläche:
+   **Google Auth Platform → Zielgruppe**).
+3. Im Abschnitt **Testnutzer** auf **+ Add users** klicken, die E-Mail-Adresse des
+   Google-Kontos eintragen, dessen Kalender verwendet wird, und speichern.
+4. In der App erneut auf **Mit Google Kalender verbinden** klicken. Es erscheint
+   eventuell noch der Hinweis „Google hat diese App nicht überprüft“. Dort auf
+   **Weiter** klicken.
+
+Wichtig: Im Status „Testen“ laufen die Zugangs-Tokens nach **7 Tagen** ab. Die App
+zeigt dann „nicht verbunden“ an, und Sie müssen einmal neu verbinden. Wer das
+vermeiden will, hat zwei Möglichkeiten:
+
+- **Google-Workspace-Konto** (eigene Firmendomain): Beim Zustimmungsbildschirm
+  Nutzertyp **Intern** wählen. Dann gibt es weder Testnutzer-Liste noch 7-Tage-Ablauf.
+- **Privates Gmail-Konto**: Auf derselben Seite unter *Veröffentlichungsstatus* auf
+  **App veröffentlichen** klicken. Eine Überprüfung durch Google ist dafür nicht
+  nötig, solange nur Sie selbst die App nutzen. Beim Verbinden erscheint dann ein
+  Warnhinweis („nicht überprüft“), den Sie über **Erweitert → Zu Patientenmanager
+  (unsicher)** bestätigen. Danach läuft die Verbindung nicht mehr ab.
+
 Ab dann gilt:
 
 - Jeder neue oder geänderte Termin wird sofort in den Kalender geschrieben.

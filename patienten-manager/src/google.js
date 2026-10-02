@@ -145,12 +145,24 @@ export class GoogleCalendar {
     const t = this.getTokens();
     if (!t?.refresh_token) throw new GoogleError('Google Kalender ist nicht verbunden.', 409);
     if (t.access_token && t.expires_at && Date.now() < t.expires_at) return t.access_token;
-    const refreshed = await this.#tokenRequest({
-      refresh_token: t.refresh_token,
-      client_id: this.cfg.clientId,
-      client_secret: this.cfg.clientSecret,
-      grant_type: 'refresh_token',
-    });
+    let refreshed;
+    try {
+      refreshed = await this.#tokenRequest({
+        refresh_token: t.refresh_token,
+        client_id: this.cfg.clientId,
+        client_secret: this.cfg.clientSecret,
+        grant_type: 'refresh_token',
+      });
+    } catch (err) {
+      // invalid_grant: Refresh-Token widerrufen oder abgelaufen (z. B. nach 7 Tagen
+      // bei einer Google-App im Status "Testen"). Verbindung zurücksetzen, damit
+      // die Oberfläche "erneut verbinden" anbietet.
+      if (err.details?.error === 'invalid_grant') {
+        this.repo.setJsonSetting(TOKEN_KEY, null);
+        throw new GoogleError('Die Google-Verbindung ist abgelaufen oder wurde widerrufen. Bitte erneut mit Google Kalender verbinden.', 409, err.details);
+      }
+      throw err;
+    }
     return this.#storeTokens(refreshed, t).access_token;
   }
 
