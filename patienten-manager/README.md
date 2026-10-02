@@ -1,0 +1,121 @@
+# Patienten-Manager
+
+Ein kleines, selbst gehostetes Patientenmanagementsystem mit lokaler SQLite-Datenbank
+und Anbindung an den Google Kalender.
+
+**Funktionen**
+
+- Patienten erfassen, suchen, bearbeiten und löschen
+  (Anrede, Vor-/Nachname, Geburtsdatum, E-Mail, Telefon, Adresse, Krankenkasse,
+  Versichertennummer, Notizen)
+- Termine pro Patient anlegen (Titel, Beginn, Dauer, Notizen)
+- Termine automatisch in einen Google Kalender eintragen, aktualisieren und löschen
+- Optional: Kalender-Einladung per E-Mail an den Patienten senden
+- Optionaler Passwortschutz für die Oberfläche
+- Keine Cloud-Datenbank: alle Daten liegen in einer SQLite-Datei auf Ihrem Rechner
+
+Technik: Node.js ≥ 22.13 (eingebautes SQLite), Express, Google Calendar REST API v3.
+Außer Express werden keine weiteren Pakete benötigt.
+
+## Schnellstart
+
+```bash
+cd patienten-manager
+npm install
+cp .env.example .env     # anpassen, siehe unten
+npm start
+```
+
+Danach im Browser <http://localhost:3000> öffnen. Die Datenbank wird beim ersten Start
+automatisch unter `data/patienten.sqlite` angelegt.
+
+Tests ausführen:
+
+```bash
+npm test
+```
+
+## Konfiguration (`.env`)
+
+| Variable | Bedeutung | Standard |
+| --- | --- | --- |
+| `PORT` | Port des Webservers | `3000` |
+| `DB_PATH` | Pfad zur SQLite-Datei | `./data/patienten.sqlite` |
+| `APP_USER` / `APP_PASSWORD` | Login für die Oberfläche (HTTP Basic Auth). Ohne `APP_PASSWORD` kein Login. | `praxis` / leer |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth-Zugangsdaten aus der Google Cloud Console | leer |
+| `GOOGLE_REDIRECT_URI` | Muss exakt mit der in Google hinterlegten Weiterleitungs-URI übereinstimmen | `http://localhost:3000/auth/google/callback` |
+| `GOOGLE_CALENDAR_ID` | Ziel-Kalender. `primary` = Hauptkalender, sonst die Kalender-ID aus den Google-Kalender-Einstellungen | `primary` |
+| `TIMEZONE` | Zeitzone der Termine | `Europe/Berlin` |
+
+## Google Kalender verbinden
+
+Die App nutzt OAuth 2.0: Sie melden sich einmal mit Ihrem Google-Konto an und erlauben
+der App, Termine in Ihren Kalender zu schreiben. Die Zugangs-Tokens werden in der
+lokalen Datenbank gespeichert.
+
+1. <https://console.cloud.google.com/> öffnen und ein Projekt anlegen (oder ein bestehendes wählen).
+2. Unter **APIs und Dienste → Bibliothek** die **Google Calendar API** aktivieren.
+3. Unter **APIs und Dienste → OAuth-Zustimmungsbildschirm** einen Zustimmungsbildschirm
+   anlegen (Typ „Extern“ reicht, Status „Testen“). Unter **Testnutzer** das Google-Konto
+   eintragen, dessen Kalender verwendet werden soll.
+4. Unter **APIs und Dienste → Anmeldedaten → Anmeldedaten erstellen → OAuth-Client-ID**:
+   - Anwendungstyp: **Webanwendung**
+   - Autorisierte Weiterleitungs-URI: `http://localhost:3000/auth/google/callback`
+     (bzw. Ihre Adresse, passend zu `GOOGLE_REDIRECT_URI`)
+5. Client-ID und Client-Secret in die `.env` eintragen und die App neu starten.
+6. In der Oberfläche oben auf **Mit Google Kalender verbinden** klicken und den Zugriff
+   bestätigen.
+
+Ab dann gilt:
+
+- Jeder neue oder geänderte Termin wird sofort in den Kalender geschrieben.
+- Gelöschte Termine (oder gelöschte Patienten) werden auch aus dem Kalender entfernt.
+- Termine, die vor der Verbindung angelegt wurden, übertragen Sie mit
+  **Alle Termine synchronisieren**.
+- Ist beim Termin „Kalender-Einladung an den Patienten senden“ angehakt und eine
+  E-Mail-Adresse hinterlegt, erhält der Patient eine Einladung von Google.
+
+Soll ein eigener Praxis-Kalender statt des Hauptkalenders verwendet werden: Im Google
+Kalender den Kalender anlegen, unter *Einstellungen → Kalender integrieren* die
+**Kalender-ID** kopieren und als `GOOGLE_CALENDAR_ID` eintragen.
+
+## Datenschutz (DSGVO)
+
+Patientendaten sind Gesundheitsdaten im Sinne von Art. 9 DSGVO. Bitte beachten Sie:
+
+- `APP_PASSWORD` setzen, sobald die App nicht nur auf dem eigenen Rechner läuft, und
+  dann nur über HTTPS (z. B. hinter einem Reverse-Proxy) betreiben.
+- Mit der Google-Anbindung werden Name, Termin und ggf. E-Mail des Patienten an Google
+  übertragen. Prüfen Sie, ob das mit Ihrer Datenschutzerklärung und Einwilligung der
+  Patienten vereinbar ist. Notizen zum Termin landen ebenfalls in der Kalender-Beschreibung.
+- Die SQLite-Datei (`data/`) regelmäßig sichern und den Zugriff auf das Verzeichnis beschränken.
+
+## Projektstruktur
+
+```
+patienten-manager/
+├── server.js          Startpunkt
+├── src/
+│   ├── app.js         Express-App und REST-API
+│   ├── db.js          SQLite-Schema, Validierung, Datenzugriff
+│   ├── google.js      OAuth 2.0 und Google-Calendar-Client
+│   └── config.js      .env-Loader und Konfiguration
+├── public/            Weboberfläche (HTML, CSS, JS ohne Framework)
+└── test/              Tests (node:test), inkl. simuliertem Google-Server
+```
+
+## REST-API (Auszug)
+
+| Methode | Pfad | Beschreibung |
+| --- | --- | --- |
+| `GET` | `/api/patienten?suche=` | Patienten auflisten / suchen |
+| `POST` | `/api/patienten` | Patient anlegen |
+| `GET` / `PUT` / `DELETE` | `/api/patienten/:id` | Patient lesen (inkl. Termine), ändern, löschen |
+| `GET` | `/api/termine?patient_id=&ab=&bis=` | Termine auflisten |
+| `POST` / `PUT` / `DELETE` | `/api/termine[/:id]` | Termin anlegen, ändern, löschen (mit Kalender-Sync) |
+| `POST` | `/api/termine/:id/sync` | Einzelnen Termin in den Kalender übertragen |
+| `GET` | `/api/google/status` | Verbindungsstatus |
+| `GET` | `/auth/google` | OAuth-Anmeldung starten |
+| `POST` | `/api/google/sync` | Alle noch nicht übertragenen Termine synchronisieren |
+| `POST` | `/api/google/disconnect` | Verbindung trennen |
+| `GET` | `/api/google/events?limit=` | Kommende Kalendereinträge lesen |

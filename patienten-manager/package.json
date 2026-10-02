@@ -1,0 +1,19 @@
+{
+  "name": "patienten-manager",
+  "version": "0.1.0",
+  "description": "Kleines Patientenmanagementsystem mit SQLite-Datenbank und Google-Kalender-Anbindung",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning server.js",
+    "dev": "node --no-warnings=ExperimentalWarning --watch server.js",
+    "test": "node --no-warnings=ExperimentalWarning --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
